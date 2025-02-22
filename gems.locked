@@ -1,0 +1,25 @@
+PATH
+  remote: .
+  specs:
+    http_serve (0.0.1)
+      passenger (~> 5.3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    dotenv (3.1.7)
+    passenger (5.3.7)
+      rack
+      rake (>= 0.8.1)
+    rack (3.1.10)
+    rake (13.2.1)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  dotenv (~> 3.1)
+  http_serve!
+
+BUNDLED WITH
+   2.3.17
