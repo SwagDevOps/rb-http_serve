@@ -66,6 +66,12 @@ class HttpServe
       .then { FileUtils }
   end
 
+  # @return [Module<JSON>]
+  def json
+    autoload(:JSON, 'json')
+      .then { JSON }
+  end
+
   # @return [Pathname]
   def path(path = nil)
     path ||= ::File.realpath(fs.pwd)
@@ -153,14 +159,19 @@ class HttpServe
     end
   end
 
+  # Displays current environment config (and exits).
+  #
+  # @param env [Hash{String => String}]
   def explain(env: ENV.to_h, argv: ARGV)
-    return unless argv[0] == 'explain'
+    return false unless argv[0] == 'explain'
 
-    autoload(:JSON, 'json')
-    JSON.pretty_generate(env).tap do
-      puts _1
-      exit(0)
+    defaults_from({}).keys.then do |keys|
+      env.to_a.keep_if { |k, _| keys.include?(k) }.sort.to_h
+    end.then do |v|
+      json.pretty_generate(v).tap { puts(_1) }
     end
+
+    exit(0)
   end
 
   # Run standalone web server
