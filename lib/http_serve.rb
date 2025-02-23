@@ -46,7 +46,10 @@ class HttpServe
       SERVE_WITH_CLEAN_ENV: 'on',
       SERVE_CONFIG_COPY: 'on',
       SERVE_CONFIG_PATH: fs.pwd,
-      SERVE_CONFIG_FILE: -> { "Passengerfile.#{env['SERVE_ENV']}.json" },
+      SERVE_CONFIG_FILE: lambda do
+        (env['SERVE_ENV'].then { _1.to_s.empty? ? 'development' : _1.to_s })
+          .then { |environment| "Passengerfile.#{environment}.json" }
+      end,
       SERVE_DOTENV_LOAD: lambda do
         autoload(:Dotenv, 'dotenv').then { return 'on' }
       rescue LoadError
