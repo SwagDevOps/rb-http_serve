@@ -87,7 +87,11 @@ class HttpServe
     end.reject { _2.to_s.empty? }.map do |k, v|
       [k, /_(COPY|LOAD)$/ =~ k.to_s ? v.to_s.downcase : v]
     end.to_h.freeze.then do |env|
-      clean_env(actual_env: actual_env, keys: env_defaults.keys) if on?(actual_env['SERVE_WITH_CLEAN_ENV'])
+      if on?(actual_env['SERVE_WITH_CLEAN_ENV'])
+        clean_env(actual_env: actual_env, keys: env_defaults.keys)
+      else
+        actual_env.merge!(env)
+      end
 
       block ? block.call(env) : env
     end
