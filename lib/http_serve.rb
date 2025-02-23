@@ -46,9 +46,13 @@ class HttpServe
       SERVE_CONFIG_COPY: 'on',
       SERVE_CONFIG_PATH: fs.pwd,
       SERVE_CONFIG_FILE: -> { "Passengerfile.#{env['SERVE_ENV']}.json" },
-      SERVE_DOTENV_LOAD: 'on',
-      SERVE_DOTENV_FILE: '.env',
+      SERVE_DOTENV_LOAD: lambda do
+        autoload(:Dotenv, 'dotenv').then { return 'on' }
+      rescue LoadError
+        return 'off'
+      end,
       SERVE_DOTENV_PATH: fs.pwd,
+      SERVE_DOTENV_FILE: '.env',
     }.transform_keys(&:to_s)
   end
 
