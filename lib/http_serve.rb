@@ -21,6 +21,7 @@ class HttpServe
     with_env(actual_env) do |env|
       configure(env: env)
       dotenv(env: env)
+      explain(env: env, argv: argv)
       serve(env: env, argv: argv)
     end
   end
@@ -146,6 +147,16 @@ class HttpServe
       path(env['SERVE_CONFIG_PATH'])
         .join(env['SERVE_CONFIG_FILE'])
         .then { fs.cp(_1, file) }
+    end
+  end
+
+  def explain(env: ENV.to_h, argv: ARGV)
+    return unless argv[0] == 'explain'
+
+    autoload(:JSON, 'json')
+    JSON.pretty_generate(env).tap do
+      puts _1
+      exit(0)
     end
   end
 
