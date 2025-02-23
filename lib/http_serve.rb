@@ -13,8 +13,8 @@ end
 #   require 'http_serve'
 #   HttpServe.call
 class HttpServe
-  # @param [Class<ENV>, Hash{String => String}] actual_env
-  # @param [Array<String>] argv
+  # @param actual_env Class<ENV>, Hash{String => String}
+  # @param argv Array<String>
   #
   # @return [Hash{String => String}]
   def call(actual_env = ENV, argv: ARGV)
@@ -37,7 +37,7 @@ class HttpServe
 
   # Give defaults or given env.
   #
-  # @param env [Hash{String => String}]
+  # @param env Hash{String => String}
   #
   # @return [Hash{String => String,Proc}]
   def defaults_from(env)
@@ -89,7 +89,7 @@ class HttpServe
 
   # Process with given environment.
   #
-  # @yieldparam [Hash{String => String}]
+  # @yieldparam Hash{String => String}
   #
   # @return [Hash{String => String}, Object]
   def with_env(actual_env = ENV, &block)
@@ -116,8 +116,8 @@ class HttpServe
 
   # Clean given env with given keys.
   #
-  # @param actual_env [Hash{String => String}, Class<ENV>]
-  # @param keys [Array<String>]
+  # @param actual_env Hash{String => String}, Class<ENV>
+  # @param keys Array<String>
   #
   # @return [Hash{String => String}]
   def clean_env(actual_env: ENV, keys: [])
@@ -143,7 +143,7 @@ class HttpServe
 
   # Copy original config.
   #
-  # @param env [Hash{String => String}]
+  # @param env Hash{String => String}
   # @see https://www.phusionpassenger.com/library/config/standalone/reference/
   def configure(env: ENV.to_h)
     path('Passengerfile.json').tap do |file|
@@ -161,7 +161,8 @@ class HttpServe
 
   # Displays current environment config (and exits).
   #
-  # @param env [Hash{String => String}]
+  # @param env Hash{String => String}
+  # @param argv Array<String>
   def explain(env: ENV.to_h, argv: ARGV)
     return false unless argv[0] == 'explain'
 
@@ -176,12 +177,14 @@ class HttpServe
 
   # Run standalone web server
   #
-  # @param env [Hash{String => String}]
+  # @param env Hash{String => String}
+  # @param argv Array<String>
   # @see https://github.com/phusion/passenger/blob/stable-6.0/bin/passenger
   def serve(env: ENV.to_h, argv: ARGV)
     version_cname = :VERSION_STRING
     end_boot_regexp = /^#+\s+Magic comment: end bootstrap\s+#+\s*$/
 
+    # noinspection RubyResolve
     require('phusion_passenger/rack_handler').then do
       if argv[0] == 'start' and PhusionPassenger.const_defined?(version_cname, false)
         puts 'Starting Phusion Passenger(R) %<version>s [%<environment>s]' % {
