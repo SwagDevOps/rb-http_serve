@@ -29,6 +29,24 @@ class HttpServe
 
   protected
 
+  # Give defaults or given env.
+  #
+  # @param env [Hash{String => String}]
+  #
+  # @return [Hash{String => String,Proc}]
+  def defaults_from(env)
+    {
+      SERVE_ENV: 'development',
+      SERVE_WITH_CLEAN_ENV: 'on',
+      SERVE_CONFIG_COPY: 'on',
+      SERVE_CONFIG_PATH: Dir.pwd,
+      SERVE_CONFIG_FILE: -> { "Passengerfile.#{env['SERVE_ENV']}.json" },
+      SERVE_DOTENV_LOAD: 'on',
+      SERVE_DOTENV_FILE: '.env',
+      SERVE_DOTENV_PATH: Dir.pwd,
+    }.transform_keys(&:to_s)
+  end
+
   # @return [Module<FileUtils>]
   def fs
     autoload(:FileUtils, 'fileutils')
@@ -55,17 +73,11 @@ class HttpServe
   # @yieldparam [Hash{String => String}]
   #
   # @return [Hash{String => String}, Object]
-  def with_env(actual_env = ENV.to_h, &block)
+  def with_env(actual_env = ENV, &block)
+    env_defaults = defaults_from(actual_env.to_h)
+
     actual_env.to_h.clone.tap do |env|
-      {
-        SERVE_ENV: 'development',
-        SERVE_CONFIG_COPY: 'on',
-        SERVE_CONFIG_PATH: Dir.pwd,
-        SERVE_CONFIG_FILE: -> { "Passengerfile.#{env['SERVE_ENV']}.json" },
-        SERVE_DOTENV_LOAD: 'on',
-        SERVE_DOTENV_FILE: '.env',
-        SERVE_DOTENV_PATH: Dir.pwd,
-      }.transform_keys(&:to_s).each do |k, v|
+      env_defaults.each do |k, v|
         if actual_env[k].to_s.empty?
           (v.is_a?(Proc) ? v.call : v.to_s).then { env[k] = _1 }
         end
@@ -73,8 +85,22 @@ class HttpServe
     end.reject { _2.to_s.empty? }.map do |k, v|
       [k, /_(COPY|LOAD)$/ =~ k.to_s ? v.to_s.downcase : v]
     end.to_h.freeze.then do |env|
+      clean_env(actual_env: actual_env, keys: env_defaults.keys) if on?(actual_env['SERVE_WITH_CLEAN_ENV'])
+
       block ? block.call(env) : env
     end
+  end
+
+  # Clean given env with given keys.
+  #
+  # @param actual_env [Hash{String => String}, Class<ENV>]
+  # @param keys [Array<String>]
+  #
+  # @return [Hash{String => String}]
+  def clean_env(actual_env: ENV, keys: [])
+    keys.map do |key|
+      [key, actual_env.delete(key)]
+    end.to_h
   end
 
   # Load dotenv (with given env).
