@@ -13,6 +13,7 @@ end
 #   require 'http_serve'
 #   HttpServe.call
 class HttpServe
+  # @return [Hash{String => String}]
   def call
     with_env do |env|
       configure(env: env)
@@ -22,6 +23,7 @@ class HttpServe
   end
 
   class << self
+    # @return [Hash{String => String}]
     def call
       self.new.call
     end
@@ -104,6 +106,8 @@ class HttpServe
   end
 
   # Load dotenv (with given env).
+  #
+  # @param env [Hash{String => String}]
   def dotenv(env: ENV.to_h)
     return unless on?(env['SERVE_DOTENV_LOAD'])
 
@@ -118,6 +122,7 @@ class HttpServe
 
   # Copy original config.
   #
+  # @param env [Hash{String => String}]
   # @see https://www.phusionpassenger.com/library/config/standalone/reference/
   def configure(env: ENV.to_h)
     path('Passengerfile.json').tap do |file|
@@ -135,6 +140,7 @@ class HttpServe
 
   # Run standalone web server
   #
+  # @param env [Hash{String => String}]
   # @see https://github.com/phusion/passenger/blob/stable-6.0/bin/passenger
   def serve(env: ENV.to_h, argv: ARGV)
     version_cname = :VERSION_STRING
