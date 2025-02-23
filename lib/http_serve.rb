@@ -41,11 +41,11 @@ class HttpServe
       SERVE_ENV: 'development',
       SERVE_WITH_CLEAN_ENV: 'on',
       SERVE_CONFIG_COPY: 'on',
-      SERVE_CONFIG_PATH: Dir.pwd,
+      SERVE_CONFIG_PATH: fs.pwd,
       SERVE_CONFIG_FILE: -> { "Passengerfile.#{env['SERVE_ENV']}.json" },
       SERVE_DOTENV_LOAD: 'on',
       SERVE_DOTENV_FILE: '.env',
-      SERVE_DOTENV_PATH: Dir.pwd,
+      SERVE_DOTENV_PATH: fs.pwd,
     }.transform_keys(&:to_s)
   end
 
@@ -57,7 +57,7 @@ class HttpServe
 
   # @return [Pathname]
   def path(path = nil)
-    path ||= ::File.realpath(Dir.pwd)
+    path ||= ::File.realpath(fs.pwd)
 
     autoload(:Pathname, 'pathname')
       .then { Pathname.new(path) }
