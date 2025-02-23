@@ -13,19 +13,22 @@ end
 #   require 'http_serve'
 #   HttpServe.call
 class HttpServe
+  # @param [Class<ENV>, Hash{String => String}] actual_env
+  # @param [Array<String>] argv
+  #
   # @return [Hash{String => String}]
-  def call
-    with_env do |env|
+  def call(actual_env = ENV, argv: ARGV)
+    with_env(actual_env) do |env|
       configure(env: env)
       dotenv(env: env)
-      serve(env: env)
+      serve(env: env, argv: argv)
     end
   end
 
   class << self
     # @return [Hash{String => String}]
-    def call
-      self.new.call
+    def call(...)
+      self.new.call(...)
     end
   end
 
@@ -150,7 +153,6 @@ class HttpServe
     version_cname = :VERSION_STRING
     end_boot_regexp = /^#+\s+Magic comment: end bootstrap\s+#+\s*$/
 
-    argv.push('start') if argv.empty?
     require('phusion_passenger/rack_handler').then do
       if argv[0] == 'start' and PhusionPassenger.const_defined?(version_cname, false)
         puts 'Starting Phusion Passenger(R) %<version>s [%<environment>s]' % {
